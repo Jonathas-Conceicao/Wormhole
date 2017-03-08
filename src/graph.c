@@ -33,7 +33,6 @@ void graphInsertNode(Sentinel * eye, int value){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'graphInsertNode'\n");
 
   (*eye).nodeAmount++;
-  if(DEBUG) fprintf(stderr, "DEBUG:eye->nodeAmount:%i\n",(*eye).nodeAmount);
   void *reallocated;
   reallocated = realloc((*eye).nodeList, sizeof(Node **) * (*eye).nodeAmount);
   if (reallocated == NULL) {
@@ -73,6 +72,7 @@ Node *getNodeFromValue(Sentinel *eye, int find){
       return NULL;
     }
     probe = *( ((Node **) (*eye).nodeList) + i);
+    if(DEBUG) fprintf(stderr, "DEBUG:Viewing node:(prob->value) %i\n", probe->value);
   }while((*probe).value != find);
 
   if(DEBUG) fprintf(stderr, "DEBUG:Finished 'getNodeFromValue'\n");
@@ -101,28 +101,26 @@ void graphInsertArrow(Sentinel *eye, int a, int b, int weight){
     fprintf(stderr, "Failed inside 'graphInsertArrow'.\n Couldn't find node with 'b' value\n");
     return;
   }
-  if(DEBUG) fprintf(stderr, "DEBUG:Starting reallocs\n");
   void *reallocated0, *reallocated1;
   (*fromNode).conections++; //Set number of arrows
   reallocated0 = realloc((*fromNode).arrows, sizeof(Node **) * (*fromNode).conections);
   reallocated1 = realloc((*fromNode).weights, sizeof(int *) * (*fromNode).conections);
-  if(DEBUG) fprintf(stderr, "DEBUG:Done with reallocs\n");
   if (reallocated0 == NULL || reallocated1 == NULL){
     fprintf(stderr, "Failed inside 'graphInsertArrow'.\nFailed a realloc\n");
     (*fromNode).conections--;
     return;
   }
-  if(DEBUG) fprintf(stderr, "DEBUG:No Realloc was NULL\n");
   (*fromNode).arrows  = (Node **) reallocated0;
   (*fromNode).weights = (int *)  reallocated1;
+  *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1) ) = toNode;
+  *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1) ) = weight;
 
-  *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1))  = toNode;
-  *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1)) = weight;
-
+  if(DEBUG) fprintf(stderr, "DEBUG:Finished 'graphInsertArrow'\n");
   return;
 }
 
 void freeGraph(Sentinel **pEye){
+  if(DEBUG) fprintf(stderr, "DEBUG:Starting 'freeGraph'\n");
   Sentinel *eye = *pEye;
   for (size_t i = 0; i < (*eye).nodeAmount; i++) {
     freeNode( ((Node **) (*eye).nodeList) + i);
@@ -130,16 +128,21 @@ void freeGraph(Sentinel **pEye){
   free((*eye).nodeList);
   free(eye);
   *pEye = NULL;
+
+  if(DEBUG) fprintf(stderr, "DEBUG:Finished 'freeGraph'\n");
+  return;
 }
 
 void freeNode(Node **pNode) {
+  if(DEBUG) fprintf(stderr, "DEBUG:Starting 'freeNode'\n");
   Node *node = *pNode;
-  for (size_t i = 0; i < (*node).conections; i++) {
-    free(((Node **) (*node).arrows) + i);
-    free(((int  *) (*node).weights) + i);
-  }
+  free( ((Node **) (*node).arrows));
+  free( ((int  *) (*node).weights));
   free(node);
   *pNode = NULL;
+
+  if(DEBUG) fprintf(stderr, "DEBUG:Finished 'freeNode'\n");
+  return;
 }
 
 int Bellman_Ford(Sentinel *graph){
