@@ -8,6 +8,7 @@
 #else
 #define DEBUG 0
 #endif
+
 /**
  * Starts an empty grath.
  * @method createGraph
@@ -18,7 +19,6 @@ Sentinel *createGraph(){
 
   ret = malloc(sizeof(Sentinel));
   (*ret).nodeAmount = 0;
-  (*ret).arrowsAmount = 0; //TODO Be sure this will be needed
   (*ret).nodeList = NULL;
 
   return ret;
@@ -116,7 +116,6 @@ void graphInsertArrow(Sentinel *eye, int a, int b, int weight){
   (*fromNode).weights = (int *)  reallocated1;  //Set pointer to reallocated memory blcok
   *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1) ) = toNode; //Set last element as new conection
   *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1) ) = weight; //Set last element as new conection
-  (*eye).arrowsAmount++; //TODO Be sure this will be needed //Updates the number of conections
 
   if(DEBUG) fprintf(stderr, "DEBUG:Finished 'graphInsertArrow'\n");
   return;
@@ -157,10 +156,14 @@ void freeNode(Node **pNode) {
   return;
 }
 
-//TODO on going
-int Bellman_Ford(Sentinel *graph, int source){
+/**
+ * The Bellman–Ford's algorithm to find the shortest path used to see if there's a negative-weight cycles
+ * @param  graph  Graph's pointer
+ * @return        [description]
+ */
+int Bellman_Ford(Sentinel *graph){
   int distance[(*graph).nodeAmount];
-  Node *predecessor[(*graph).nodeAmount];
+  Node *predecessor[(*graph).nodeAmount]; //Will be needed only if DEBUG is set
   Node *uNode, *vNode;
   int weight, u, v;
 
@@ -169,8 +172,8 @@ int Bellman_Ford(Sentinel *graph, int source){
     distance[i] = 10000; // Values will never be grather than 1000
     predecessor[i] = NULL;
   }
-  distance[source] = 0;
-  predecessor[source] = getNodeFromValue(graph, source);
+  distance[0] = 0; //set 'source' distance
+  predecessor[0] = getNodeFromValue(graph, 0); //Set 'source' predecessor in case of debug
 
   //Step 2 relax the arrows
   for (size_t i = 0; i < (*graph).nodeAmount; i++) {

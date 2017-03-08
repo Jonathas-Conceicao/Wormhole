@@ -3,7 +3,7 @@
 #include "graph.h"
 
 
-int main(int argc, char const *argv[]) {
+int main(void) {
   size_t i, n, m; //Variables for the for loops.
   int interactions, galaxys, whormholes; //Input data
   int x, y, t; //Input data
@@ -21,7 +21,7 @@ int main(int argc, char const *argv[]) {
       graphInsertArrow(graph, x, y, t);
     }
     // printf("Interação 1 de %i:\n", interactions);
-    if (Bellman_Ford(graph, 0) > 0) printf("possível\n");
+    if (Bellman_Ford(graph) > 0) printf("possível\n");
     else printf("impossível\n");
     freeGraph(&graph);
   }
