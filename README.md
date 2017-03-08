@@ -1,5 +1,13 @@
 # Trabalho 2: **Buracos de Minhoca**
 
+## How to use it
+
+ 1. Run **make** all to build the executable;  
+   - Export *DEBUG=-DDEBUG* to activate debug flag;  
+ 2. Execute the **BlackHole.out**  
+   - There're 3 Input exemples in *Inputs/*
+
+## Especificação
 Buraco de minhoca é o termo popular usado para definir uma espécie de túnel no espaço-tempo que conecta duas áreas distantes do Universo. O conceito foi inicialmente proposto em 1921 pelo físico alemão Hermann Weyl, mas o termo em inglês, wormhole, foi popularizado pelo físico americano John Wheeler em 1957. Um físico teórico contemporâneo, João Bogus, afirma ter mapeado diversos buracos de minhocas no Universo e ter descoberto várias de suas propriedades. As mais interessantes são:  
 
   - O tempo para atravessar um buraco de minhoca é infinitesimal e negligível;  
