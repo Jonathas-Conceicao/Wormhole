@@ -16,7 +16,7 @@ typedef struct _Node{
  * Graph's sentinel ONLY used in graph.c to find a graph by it's value.
  */
 typedef struct _Sentinel{
-  // unsigned int arrowsAmount;  //Quantity of arrows
+  unsigned int arrowsAmount;     //TODO Be sure this will be needed
   unsigned int nodeAmount;       //Quantity of nodes
   Node         **nodeList;       //List will all the pointers of Nodes
 } Sentinel; //Graph's auxiliar struct.
@@ -27,4 +27,4 @@ void freeGraph(Sentinel **);
 void graphInsertNode(Sentinel *, int);
 Node *getNodeFromValue(Sentinel *, int);
 void graphInsertArrow(Sentinel *, int, int, int);
-int Bellman_Ford(Sentinel *);
+int Bellman_Ford(Sentinel *, int);

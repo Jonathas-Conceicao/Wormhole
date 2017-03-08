@@ -20,7 +20,8 @@ int main(int argc, char const *argv[]) {
       scanf("%d %d %d\n", &x, &y, &t);
       graphInsertArrow(graph, x, y, t);
     }
-    if (Bellman_Ford(graph) > 0) printf("possível\n");
+    // printf("Interação 1 de %i:\n", interactions);
+    if (Bellman_Ford(graph, 0) > 0) printf("possível\n");
     else printf("impossível\n");
     freeGraph(&graph);
   }

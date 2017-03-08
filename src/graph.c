@@ -18,6 +18,7 @@ Sentinel *createGraph(){
 
   ret = malloc(sizeof(Sentinel));
   (*ret).nodeAmount = 0;
+  (*ret).arrowsAmount = 0; //TODO Be sure this will be needed
   (*ret).nodeList = NULL;
 
   return ret;
@@ -91,16 +92,17 @@ void graphInsertArrow(Sentinel *eye, int a, int b, int weight){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'graphInsertArrow'\n");
   Node *fromNode;
   Node *toNode;
-  fromNode = getNodeFromValue(eye, a);
+  fromNode = getNodeFromValue(eye, a); //Get node 'a'
   if (fromNode == NULL) {
     fprintf(stderr, "Failed inside 'graphInsertArrow'.\n Couldn't find node with 'a' value\n");
     return;
   }
-  toNode = getNodeFromValue(eye, b);
+  toNode = getNodeFromValue(eye, b); //Get node 'b'
   if (fromNode == NULL) {
     fprintf(stderr, "Failed inside 'graphInsertArrow'.\n Couldn't find node with 'b' value\n");
     return;
   }
+
   void *reallocated0, *reallocated1;
   (*fromNode).conections++; //Set number of arrows
   reallocated0 = realloc((*fromNode).arrows, sizeof(Node **) * (*fromNode).conections);
@@ -110,15 +112,21 @@ void graphInsertArrow(Sentinel *eye, int a, int b, int weight){
     (*fromNode).conections--;
     return;
   }
-  (*fromNode).arrows  = (Node **) reallocated0;
-  (*fromNode).weights = (int *)  reallocated1;
-  *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1) ) = toNode;
-  *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1) ) = weight;
+  (*fromNode).arrows  = (Node **) reallocated0; //Set pointer to reallocated memory block
+  (*fromNode).weights = (int *)  reallocated1;  //Set pointer to reallocated memory blcok
+  *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1) ) = toNode; //Set last element as new conection
+  *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1) ) = weight; //Set last element as new conection
+  (*eye).arrowsAmount++; //TODO Be sure this will be needed //Updates the number of conections
 
   if(DEBUG) fprintf(stderr, "DEBUG:Finished 'graphInsertArrow'\n");
   return;
 }
 
+/**
+ * Releses all graph's memory and set pointer to NULL
+ * @method freeGraph
+ * @param pEye pointer to graph's pointer
+ */
 void freeGraph(Sentinel **pEye){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'freeGraph'\n");
   Sentinel *eye = *pEye;
@@ -133,6 +141,10 @@ void freeGraph(Sentinel **pEye){
   return;
 }
 
+/**
+ * Releses all node's memory and set pointer to NULL
+ * @param pNode pointer to node's pointer
+ */
 void freeNode(Node **pNode) {
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'freeNode'\n");
   Node *node = *pNode;
@@ -145,6 +157,49 @@ void freeNode(Node **pNode) {
   return;
 }
 
-int Bellman_Ford(Sentinel *graph){
-  return -1;
+//TODO on going
+int Bellman_Ford(Sentinel *graph, int source){
+  int distance[(*graph).nodeAmount];
+  Node *predecessor[(*graph).nodeAmount];
+  Node *uNode, *vNode;
+  int weight, u, v;
+
+  //Step 1 set distance to maximum and predecessor to NULL
+  for (size_t i = 0; i < (*graph).nodeAmount; i++) {
+    distance[i] = 10000; // Values will never be grather than 1000
+    predecessor[i] = NULL;
+  }
+  distance[source] = 0;
+  predecessor[source] = getNodeFromValue(graph, source);
+
+  //Step 2 relax the arrows
+  for (size_t i = 0; i < (*graph).nodeAmount; i++) {
+    uNode = *(( (Node **) (*graph).nodeList) + i);
+    for (size_t j = 0; j < (*uNode).conections; j++) {
+      weight = *( ((int *) (*uNode).weights) + j);
+      vNode  = *( ((Node **) (*uNode).arrows) + j);
+      u = (*uNode).value;
+      v = (*vNode).value;
+      if(distance[u] +  weight < distance[v]){
+        distance[v] = distance[u] + weight;
+        predecessor[v] = uNode;
+      }
+    }
+  }
+
+  //Step 3 check for negative-weight cycles
+  for (size_t i = 0; i < (*graph).nodeAmount; i++) {
+    if(DEBUG) fprintf(stderr, "Node:%i -> Predecessor:%i Distance:%i\n",(int) i, (*(predecessor[i])).value ,distance[i] );
+    uNode = *(( (Node **) (*graph).nodeList) + i);
+    for (size_t j = 0; j < (*uNode).conections; j++) {
+      weight = *( ((int *) (*uNode).weights) + j);
+      vNode  = *( ((Node **) (*uNode).arrows) + j);
+      u = (*uNode).value;
+      v = (*vNode).value;
+      if (distance[u] +  weight < distance[v]) {
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
