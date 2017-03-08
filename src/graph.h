@@ -1,6 +1,14 @@
-#ifndef GRAPH
-#define GRAPH
+#ifndef GRAPH_H
+#define GRAPH_H
 #endif
+
+#ifdef DEBUG
+#undef DEBUG
+#define DEBUG 1
+#else
+#define DEBUG 0
+#endif
+
 /**
  * Struct on wich the graph is build.
  * All graphs are a conjuct of nodes.

@@ -2,13 +2,6 @@
 #include <stdio.h>
 #include "graph.h"
 
-#ifdef DEBUG
-#undef DEBUG
-#define DEBUG 1
-#else
-#define DEBUG 0
-#endif
-
 /**
  * Starts an empty grath.
  * @method createGraph
@@ -30,7 +23,7 @@ Sentinel *createGraph(){
  * @param  eye             Grath's sentinel.
  * @param  value           Node's value.
  */
-void graphInsertNode(Sentinel * eye, int value){
+void graphInsertNode(Sentinel *eye, int value){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'graphInsertNode'\n");
 
   (*eye).nodeAmount++;
@@ -41,10 +34,14 @@ void graphInsertNode(Sentinel * eye, int value){
     (*eye).nodeAmount--;
     return;
   }
-  (*eye).nodeList  = (Node **) reallocated;
+  (*eye).nodeList = (Node **) reallocated;
   Node *newNode;
 
   newNode = malloc(sizeof(Node));
+  if (newNode == NULL) {
+    fprintf(stderr, "Failed inside 'graphInsertNode'.\nFailed malloc\n");
+    return;
+  }
   (*newNode).value = value;  //Set Node's value
   (*newNode).conections = 0; //Set number of arrows
   (*newNode).arrows  = NULL; //Still a empty list of pointers
@@ -65,11 +62,11 @@ void graphInsertNode(Sentinel * eye, int value){
 Node *getNodeFromValue(Sentinel *eye, int find){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'getNodeFromValue'\n");
   Node *probe;
-  size_t i = -1;
+  int i = -1;
   do{
     i++;
     if (i > (*eye).nodeAmount) {
-      fprintf(stderr, "Failed inside 'getNodeFromValue'.\n Couldn't find node with 'find' value\n");
+      if(DEBUG) fprintf(stderr, "Failed inside 'getNodeFromValue'.\n Couldn't find node with 'find' value\n");
       return NULL;
     }
     probe = *( ((Node **) (*eye).nodeList) + i);
@@ -169,7 +166,7 @@ int Bellman_Ford(Sentinel *graph){
 
   //Step 1 set distance to maximum and predecessor to NULL
   for (size_t i = 0; i < (*graph).nodeAmount; i++) {
-    distance[i] = 10000; // Values will never be grather than 1000
+    distance[i] = INT_MAX; // Values will never be grather than 1000
     predecessor[i] = NULL;
   }
   distance[0] = 0; //set 'source' distance
