@@ -17,7 +17,7 @@ int main(void) {
       graphInsertNode(graph, n);
     }
     for (m = 0; m < whormholes; m++) {
-      scanf("%d %d %d\n", &x, &y, &t);
+      scanf("%d %d %d%*c", &x, &y, &t);
       graphInsertArrow(graph, x, y, t);
     }
     // printf("Interação 1 de %i:\n", interactions);

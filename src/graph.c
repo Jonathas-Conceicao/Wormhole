@@ -159,6 +159,7 @@ void freeNode(Node **pNode) {
  * @return        [description]
  */
 int Bellman_Ford(Sentinel *graph){
+  if(DEBUG) fprintf(stderr, "DEBUG:Starting 'Bellman_Ford'\n");
   int distance[(*graph).nodeAmount];
   Node *predecessor[(*graph).nodeAmount]; //Will be needed only if DEBUG is set
   Node *uNode, *vNode;
@@ -166,7 +167,7 @@ int Bellman_Ford(Sentinel *graph){
 
   //Step 1 set distance to maximum and predecessor to NULL
   for (size_t i = 0; i < (*graph).nodeAmount; i++) {
-    distance[i] = INT_MAX; // Values will never be grather than 1000
+    distance[i] = 100000; // Values will never be grather than 1000
     predecessor[i] = NULL;
   }
   distance[0] = 0; //set 'source' distance
@@ -201,5 +202,6 @@ int Bellman_Ford(Sentinel *graph){
       }
     }
   }
+  if(DEBUG) fprintf(stderr, "DEBUG:Finished 'Bellman_Ford'\n");
   return 0;
 }
