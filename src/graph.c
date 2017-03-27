@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include "graph.h"
 
-#ifdef DEBUG
-#undef DEBUG
-#define DEBUG 1
-#else
-#define DEBUG 0
-#endif
 /**
  * Starts an empty grath.
  * @method createGraph
@@ -29,7 +23,7 @@ Sentinel *createGraph(){
  * @param  eye             Grath's sentinel.
  * @param  value           Node's value.
  */
-void graphInsertNode(Sentinel * eye, int value){
+void graphInsertNode(Sentinel *eye, int value){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'graphInsertNode'\n");
 
   (*eye).nodeAmount++;
@@ -40,10 +34,14 @@ void graphInsertNode(Sentinel * eye, int value){
     (*eye).nodeAmount--;
     return;
   }
-  (*eye).nodeList  = (Node **) reallocated;
+  (*eye).nodeList = (Node **) reallocated;
   Node *newNode;
 
   newNode = malloc(sizeof(Node));
+  if (newNode == NULL) {
+    fprintf(stderr, "Failed inside 'graphInsertNode'.\nFailed malloc\n");
+    return;
+  }
   (*newNode).value = value;  //Set Node's value
   (*newNode).conections = 0; //Set number of arrows
   (*newNode).arrows  = NULL; //Still a empty list of pointers
@@ -64,11 +62,11 @@ void graphInsertNode(Sentinel * eye, int value){
 Node *getNodeFromValue(Sentinel *eye, int find){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'getNodeFromValue'\n");
   Node *probe;
-  size_t i = -1;
+  int i = -1;
   do{
     i++;
     if (i > (*eye).nodeAmount) {
-      fprintf(stderr, "Failed inside 'getNodeFromValue'.\n Couldn't find node with 'find' value\n");
+      if(DEBUG) fprintf(stderr, "Failed inside 'getNodeFromValue'.\n Couldn't find node with 'find' value\n");
       return NULL;
     }
     probe = *( ((Node **) (*eye).nodeList) + i);
@@ -91,16 +89,17 @@ void graphInsertArrow(Sentinel *eye, int a, int b, int weight){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'graphInsertArrow'\n");
   Node *fromNode;
   Node *toNode;
-  fromNode = getNodeFromValue(eye, a);
+  fromNode = getNodeFromValue(eye, a); //Get node 'a'
   if (fromNode == NULL) {
     fprintf(stderr, "Failed inside 'graphInsertArrow'.\n Couldn't find node with 'a' value\n");
     return;
   }
-  toNode = getNodeFromValue(eye, b);
+  toNode = getNodeFromValue(eye, b); //Get node 'b'
   if (fromNode == NULL) {
     fprintf(stderr, "Failed inside 'graphInsertArrow'.\n Couldn't find node with 'b' value\n");
     return;
   }
+
   void *reallocated0, *reallocated1;
   (*fromNode).conections++; //Set number of arrows
   reallocated0 = realloc((*fromNode).arrows, sizeof(Node **) * (*fromNode).conections);
@@ -110,15 +109,20 @@ void graphInsertArrow(Sentinel *eye, int a, int b, int weight){
     (*fromNode).conections--;
     return;
   }
-  (*fromNode).arrows  = (Node **) reallocated0;
-  (*fromNode).weights = (int *)  reallocated1;
-  *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1) ) = toNode;
-  *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1) ) = weight;
+  (*fromNode).arrows  = (Node **) reallocated0; //Set pointer to reallocated memory block
+  (*fromNode).weights = (int *)  reallocated1;  //Set pointer to reallocated memory blcok
+  *( ((Node **) (*fromNode).arrows) + ((*fromNode).conections - 1) ) = toNode; //Set last element as new conection
+  *( ((int  *) (*fromNode).weights) + ((*fromNode).conections - 1) ) = weight; //Set last element as new conection
 
   if(DEBUG) fprintf(stderr, "DEBUG:Finished 'graphInsertArrow'\n");
   return;
 }
 
+/**
+ * Releses all graph's memory and set pointer to NULL
+ * @method freeGraph
+ * @param pEye pointer to graph's pointer
+ */
 void freeGraph(Sentinel **pEye){
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'freeGraph'\n");
   Sentinel *eye = *pEye;
@@ -133,6 +137,10 @@ void freeGraph(Sentinel **pEye){
   return;
 }
 
+/**
+ * Releses all node's memory and set pointer to NULL
+ * @param pNode pointer to node's pointer
+ */
 void freeNode(Node **pNode) {
   if(DEBUG) fprintf(stderr, "DEBUG:Starting 'freeNode'\n");
   Node *node = *pNode;
@@ -145,6 +153,55 @@ void freeNode(Node **pNode) {
   return;
 }
 
+/**
+ * The Bellman–Ford's algorithm to find the shortest path used to see if there's a negative-weight cycles
+ * @param  graph  Graph's pointer
+ * @return        [description]
+ */
 int Bellman_Ford(Sentinel *graph){
-  return -1;
+  if(DEBUG) fprintf(stderr, "DEBUG:Starting 'Bellman_Ford'\n");
+  int distance[(*graph).nodeAmount];
+  Node *predecessor[(*graph).nodeAmount]; //Will be needed only if DEBUG is set
+  Node *uNode, *vNode;
+  int weight, u, v;
+
+  //Step 1 set distance to maximum and predecessor to NULL
+  for (size_t i = 0; i < (*graph).nodeAmount; i++) {
+    distance[i] = 100000; // Values will never be grather than 1000
+    predecessor[i] = NULL;
+  }
+  distance[0] = 0; //set 'source' distance
+  predecessor[0] = getNodeFromValue(graph, 0); //Set 'source' predecessor in case of debug
+
+  //Step 2 relax the arrows
+  for (size_t i = 0; i < (*graph).nodeAmount; i++) {
+    uNode = *(( (Node **) (*graph).nodeList) + i);
+    for (size_t j = 0; j < (*uNode).conections; j++) {
+      weight = *( ((int *) (*uNode).weights) + j);
+      vNode  = *( ((Node **) (*uNode).arrows) + j);
+      u = (*uNode).value;
+      v = (*vNode).value;
+      if(distance[u] +  weight < distance[v]){
+        distance[v] = distance[u] + weight;
+        predecessor[v] = uNode;
+      }
+    }
+  }
+
+  //Step 3 check for negative-weight cycles
+  for (size_t i = 0; i < (*graph).nodeAmount; i++) {
+    if(DEBUG) fprintf(stderr, "Node:%i -> Predecessor:%i Distance:%i\n",(int) i, (*(predecessor[i])).value ,distance[i] );
+    uNode = *(( (Node **) (*graph).nodeList) + i);
+    for (size_t j = 0; j < (*uNode).conections; j++) {
+      weight = *( ((int *) (*uNode).weights) + j);
+      vNode  = *( ((Node **) (*uNode).arrows) + j);
+      u = (*uNode).value;
+      v = (*vNode).value;
+      if (distance[u] +  weight < distance[v]) {
+        return 1;
+      }
+    }
+  }
+  if(DEBUG) fprintf(stderr, "DEBUG:Finished 'Bellman_Ford'\n");
+  return 0;
 }

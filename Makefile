@@ -1,3 +1,4 @@
+#This is what you get for trying to make the Wormhole
 TARGET = BlackHole
 
 #C compiler

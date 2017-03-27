@@ -1,6 +1,14 @@
-#ifndef GRAPH
-#define GRAPH
+#ifndef GRAPH_H
+#define GRAPH_H
 #endif
+
+#ifdef DEBUG
+#undef DEBUG
+#define DEBUG 1
+#else
+#define DEBUG 0
+#endif
+
 /**
  * Struct on wich the graph is build.
  * All graphs are a conjuct of nodes.
@@ -16,7 +24,6 @@ typedef struct _Node{
  * Graph's sentinel ONLY used in graph.c to find a graph by it's value.
  */
 typedef struct _Sentinel{
-  // unsigned int arrowsAmount;  //Quantity of arrows
   unsigned int nodeAmount;       //Quantity of nodes
   Node         **nodeList;       //List will all the pointers of Nodes
 } Sentinel; //Graph's auxiliar struct.
